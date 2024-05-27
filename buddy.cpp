@@ -7,15 +7,16 @@
 using namespace std;
 
 /**
- * 描述 Buddy类的构造函数，用于初始化Buddy系统
- * 参数 space 内存空间的起始地址
- * 参数 size 可用内存块的数量
+ * Describes the constructor of the Buddy class, used to initialize the Buddy system
+ * Parameter space: the starting address of the memory space
+ * Parameter size: the number of available memory blocks
  */
-buddy::buddy(void * space, unsigned long long size) {
+buddy::buddy(void* space, unsigned long long size) {
     try {
         new(&this->spinlock) recursive_mutex();
         int neededSpace = 1;
-        while ((sizeof(buddy) + sizeof(page) * (size - neededSpace) + sizeof(list_head) * ((int)log2(size - neededSpace)+1)) > BLOCK_SIZE*neededSpace) {
+        // Adjust the size to fit the Buddy system metadata within a block
+        while ((sizeof(buddy) + sizeof(page) * (size - neededSpace) + sizeof(list_head) * ((int)log2(size - neededSpace) + 1)) > BLOCK_SIZE * neededSpace) {
             neededSpace++;
         }
         size -= neededSpace;
@@ -26,11 +27,12 @@ buddy::buddy(void * space, unsigned long long size) {
             pagesBase[i].init_page();
         }
         this->maxBlock = (int)log2(size) + 1;
-        void * tmp = this->space;
+        void* tmp = this->space;
 
+        // Initialize the availability list for different order blocks
         this->avail = new((void*)((unsigned long long)space + sizeof(buddy) + sizeof(page) * (size))) list_head[maxBlock];
         for (int i = maxBlock - 1; i >= 0; i--) {
-            if ((size >> i ) &1) {
+            if ((size >> i) & 1) {
                 avail[i].next = avail[i].prev = (list_head*)tmp;
                 unsigned long long index = ((unsigned long long) tmp - (unsigned long long) (this->space)) >> (unsigned long long)log2(BLOCK_SIZE);
                 pagesBase[index].order = i;
@@ -39,27 +41,29 @@ buddy::buddy(void * space, unsigned long long size) {
                 tmp = (void*)((unsigned long long) tmp + (BLOCK_SIZE << i));
             }
         }
-    } catch (const exception& e) {
+    }
+    catch (const exception& e) {
         cerr << "Exception caught in buddy constructor: " << e.what() << endl;
     }
 }
 
 /**
- * 描述 从Buddy系统中获取指定大小的内存块
- * 参数 order 内存块的大小（以2的幂次方表示）
- * 返回 成功分配的内存块指针，若分配失败则返回nullptr
+ * Describes obtaining a memory block of specified size from the Buddy system
+ * Parameter order: the size of the memory block (expressed as a power of 2)
+ * Return: pointer to the successfully allocated memory block, or nullptr if allocation fails
  */
-void * buddy::kmem_getpages(unsigned long long order) {
+void* buddy::kmem_getpages(unsigned long long order) {
     try {
-        if (order < 0 || order > maxBlock) throw invalid_argument("Invalid order parameter"); // 抛出异常：无效的 order 参数
+        if (order < 0 || order > maxBlock) throw invalid_argument("Invalid order parameter"); // Throw exception: invalid order parameter
         lock_guard<recursive_mutex> guard(spinlock);
         unsigned long long bestAvail = order;
+        // Try to find the best match
         while ((bestAvail < maxBlock) && ((avail[bestAvail].next) == nullptr)) {
-            bestAvail++; // 尝试找到最佳匹配
+            bestAvail++;
         }
-        if (bestAvail > maxBlock) throw runtime_error("Cannot allocate memory of this size"); // 抛出异常：无法分配此大小的内存块
+        if (bestAvail > maxBlock) throw runtime_error("Cannot allocate memory of this size"); // Throw exception: cannot allocate memory of this size
 
-        // 从级别中移除页面
+        // Remove the page from the level
         list_head* ret = avail[bestAvail].next;
         list_head* tmp = ret->next;
         avail[bestAvail].next = tmp;
@@ -67,57 +71,61 @@ void * buddy::kmem_getpages(unsigned long long order) {
             tmp->prev = &avail[bestAvail];
         }
         unsigned long long index = ((unsigned long long) ret - (unsigned long long) (this->space)) >> (unsigned long long) log2(BLOCK_SIZE);
-        pagesBase[index].order = ~0; // 标记为已分配
+        pagesBase[index].order = ~0; // Mark as allocated
 
-        while (bestAvail > order) { // 如果需要拆分更高级别的块以获得所需大小
+        // If necessary, split higher-level blocks to obtain the required size
+        while (bestAvail > order) {
             bestAvail--;
             tmp = (list_head*)((unsigned long long) ret + (BLOCK_SIZE << bestAvail));
             tmp->next = nullptr;
-            tmp->prev = &avail[bestAvail]; // avail[bestAvail] 确定为空，将 tmp 放在开头
+            tmp->prev = &avail[bestAvail]; // avail[bestAvail] is confirmed to be empty, place tmp at the beginning
             avail[bestAvail].next = avail[bestAvail].prev = tmp;
             index = ((unsigned long long) tmp - (unsigned long long) (this->space)) >> (unsigned long long) log2(BLOCK_SIZE);
-            pagesBase[index].order = (unsigned int) bestAvail;
+            pagesBase[index].order = (unsigned int)bestAvail;
         }
         return (void*)ret;
-    } catch (const exception& e) {
+    }
+    catch (const exception& e) {
         cerr << "Exception caught in kmem_getpages function: " << e.what() << endl;
         return nullptr;
     }
 }
 
 /**
- * 描述 释放指定内存块到Buddy系统中
- * 参数 from 要释放的内存块指针
- * 参数 order 内存块的大小（以2的幂次方表示）
- * 返回 成功释放返回1，失败返回0
+ * Describes releasing a specified memory block back to the Buddy system
+ * Parameter from: the memory block pointer to be released
+ * Parameter order: the size of the memory block (expressed as a power of 2)
+ * Return: 1 if successfully released, 0 if failed
  */
-int buddy::kmem_freepages(void * from, unsigned long long order) {
+int buddy::kmem_freepages(void* from, unsigned long long order) {
     try {
-        if (order < 0 || order > maxBlock || from == nullptr) throw invalid_argument("Invalid order parameter or null pointer"); // 抛出异常：无效的 order 参数或空指针
+        if (order < 0 || order > maxBlock || from == nullptr) throw invalid_argument("Invalid order parameter or null pointer"); // Throw exception: invalid order parameter or null pointer
         lock_guard<recursive_mutex> guard(spinlock);
         list_head* tmp;
-        while (true) { // 循环直到没有可合并的 buddy
-            unsigned long long mask = BLOCK_SIZE << order; // 用于确定 buddy 的掩码
-            tmp = (list_head*)((unsigned long long) (this->space) + (((unsigned long long) from - (unsigned long long) (this->space)) ^ mask)); // 找到 buddy 的地址
-            unsigned long long index = ((unsigned long long)tmp - (unsigned long long) (this->space)) >> (unsigned long long) log2(BLOCK_SIZE); // 使用页面索引确定 buddy 的状态
+        // Loop until there are no more mergeable buddies
+        while (true) {
+            unsigned long long mask = BLOCK_SIZE << order; // Mask to determine the buddy
+            tmp = (list_head*)((unsigned long long) (this->space) + (((unsigned long long) from - (unsigned long long) (this->space)) ^ mask)); // Find the address of the buddy
+            unsigned long long index = ((unsigned long long)tmp - (unsigned long long) (this->space)) >> (unsigned long long) log2(BLOCK_SIZE); // Use the page index to determine the state of the buddy
             if (index >= usable) {
                 break;
             }
-            if (tmp != nullptr && pagesBase[index].order == order) { // 如果 buddy 是空闲的
-                tmp->prev->next = tmp->next; // 从当前 buddy 级别中移除
+            if (tmp != nullptr && pagesBase[index].order == order) { // If the buddy is free
+                tmp->prev->next = tmp->next; // Remove from the current buddy level
                 if (tmp->next != nullptr) {
                     tmp->next->prev = tmp->prev;
                 }
-                pagesBase[index].order = ~0; // 页面不在 buddy 空闲列表中
-                order++; // 检查更高级别的块
-                if ((void*)tmp < from) { // 如果找到的 buddy 在给定的 buddy 之前
-                    from = (void*)tmp; // 调整
+                pagesBase[index].order = ~0; // The page is not in the buddy free list
+                order++; // Check a higher level of blocks
+                if ((void*)tmp < from) { // If the found buddy is before the given buddy
+                    from = (void*)tmp; // Adjust
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
-        // 放入可用列表
+        // Place in the available list
         tmp = avail[order].next;
         ((list_head*)from)->next = tmp;
         if (tmp != nullptr) {
@@ -126,9 +134,10 @@ int buddy::kmem_freepages(void * from, unsigned long long order) {
         ((list_head*)from)->prev = &avail[order];
         avail[order].next = (list_head*)from;
         unsigned long long index = ((unsigned long long)from - (unsigned long long)(this->space)) >> (unsigned long long) log2(BLOCK_SIZE);
-        pagesBase[index].order = (unsigned int) order; // 从此页面开始，空闲 2^order 大小的块
+        pagesBase[index].order = (unsigned int)order; // The start of a free block of size 2^order
         return 1;
-    } catch (const exception& e) {
+    }
+    catch (const exception& e) {
         cerr << "Exception caught in kmem_freepages function: " << e.what() << endl;
         return 0;
     }
