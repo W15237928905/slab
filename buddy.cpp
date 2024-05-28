@@ -12,7 +12,10 @@ using namespace std;
  * Parameter size: the number of available memory blocks
  */
 buddy::buddy(void* space, unsigned long long size) {
-    try {
+    if (space == nullptr || size == 0) {
+        log_error(KMEM_INVALID_SIZE, "buddy constructor");
+        return;
+    }
         new(&this->spinlock) recursive_mutex();
         int neededSpace = 1;
         // Adjust the size to fit the Buddy system metadata within a block
@@ -42,9 +45,7 @@ buddy::buddy(void* space, unsigned long long size) {
             }
         }
     }
-    catch (const exception& e) {
-        cerr << "Exception caught in buddy constructor: " << e.what() << endl;
-    }
+   
 }
 
 /**
@@ -53,15 +54,20 @@ buddy::buddy(void* space, unsigned long long size) {
  * Return: pointer to the successfully allocated memory block, or nullptr if allocation fails
  */
 void* buddy::kmem_getpages(unsigned long long order) {
-    try {
-        if (order < 0 || order > maxBlock) throw invalid_argument("Invalid order parameter"); // Throw exception: invalid order parameter
+    if (order < 0 || order > maxBlock) {
+        log_error(KMEM_INVALID_SIZE, "kmem_getpages");
+        return nullptr;
+    }
         lock_guard<recursive_mutex> guard(spinlock);
         unsigned long long bestAvail = order;
         // Try to find the best match
         while ((bestAvail < maxBlock) && ((avail[bestAvail].next) == nullptr)) {
             bestAvail++;
         }
-        if (bestAvail > maxBlock) throw runtime_error("Cannot allocate memory of this size"); // Throw exception: cannot allocate memory of this size
+        if (bestAvail > maxBlock) {
+            log_error(KMEM_ALLOC_FAILURE, "kmem_getpages");
+            return nullptr;
+        }
 
         // Remove the page from the level
         list_head* ret = avail[bestAvail].next;
@@ -85,10 +91,7 @@ void* buddy::kmem_getpages(unsigned long long order) {
         }
         return (void*)ret;
     }
-    catch (const exception& e) {
-        cerr << "Exception caught in kmem_getpages function: " << e.what() << endl;
-        return nullptr;
-    }
+    
 }
 
 /**
@@ -98,8 +101,10 @@ void* buddy::kmem_getpages(unsigned long long order) {
  * Return: 1 if successfully released, 0 if failed
  */
 int buddy::kmem_freepages(void* from, unsigned long long order) {
-    try {
-        if (order < 0 || order > maxBlock || from == nullptr) throw invalid_argument("Invalid order parameter or null pointer"); // Throw exception: invalid order parameter or null pointer
+    if (order < 0 || order > maxBlock || from == nullptr) {
+        log_error(KMEM_INVALID_SIZE, "kmem_freepages");
+        return 0;
+    }
         lock_guard<recursive_mutex> guard(spinlock);
         list_head* tmp;
         // Loop until there are no more mergeable buddies
@@ -137,8 +142,5 @@ int buddy::kmem_freepages(void* from, unsigned long long order) {
         pagesBase[index].order = (unsigned int)order; // The start of a free block of size 2^order
         return 1;
     }
-    catch (const exception& e) {
-        cerr << "Exception caught in kmem_freepages function: " << e.what() << endl;
-        return 0;
-    }
+    
 }
