@@ -9,7 +9,10 @@
 理论学习：
 
 [Linux内存管理中的slab分配器 - 摩斯电码 - 博客园](https://www.cnblogs.com/pengdonglin137/p/3878552.html)
+
 [slab分配器](https://github.com/sonntex/slab-allocator)
+
+源码研读：
 
 [Linux 内核 slab 分配器源码](https://zhuanlan.zhihu.com/p/358891862)
 
