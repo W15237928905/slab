@@ -68,4 +68,4 @@
 
 # 3.问题及解决方法
 
-    在本次项目过程中我们使用的是最基础的dev-c++进行编译。而使用此编译器进行编译时会出现无法成功编译的报错信息，提示出现：#error This file requires compiler and library support for the ISO C++ 2011。我们需要在其工具里找到编译选项，在编译时加入以下命令-std=c++11，成功运行。在编译时出现not defined method问题，经过检查，发现有自创的库文件未导入。
+> 在本次项目过程中我们使用的是最基础的dev-c++进行编译。而使用此编译器进行编译时会出现无法成功编译的报错信息，提示出现：#error This file requires compiler and library support for the ISO C++ 2011。我们需要在其工具里找到编译选项，在编译时加入以下命令-std=c++11，成功运行。在编译时出现not defined method问题，经过检查，发现有自创的库文件未导入。
