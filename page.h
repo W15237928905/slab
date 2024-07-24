@@ -10,21 +10,27 @@
 typedef struct kmem_cache_s kmem_cache_t;
 typedef struct slab slab;
 
-//in page struct next points to the cache and prev points to the slab that the page belongs
 typedef struct page {
-	list_head list;
-	unsigned int order;
+    list_head list; // 链表节点，用于将页面组织成链表
+    unsigned int order; // 页面的阶数，表示页面大小的2的幂次
 
-	void init_page();
+    // 初始化页面
+    void init_page();
 
-	static void set_cache(page * pagep, kmem_cache_t *cachep);
+    // 设置页面所属的缓存对象
+    static void set_cache(page* pagep, kmem_cache_t* cachep);
 
-	static kmem_cache_t * get_cache(page* pagep);
+    // 获取页面所属的缓存对象
+    static kmem_cache_t* get_cache(page* pagep);
 
-	static void set_slab(page * pagep, slab* slabp);
+    // 设置页面所属的slab对象
+    static void set_slab(page* pagep, slab* slabp);
 
-	static slab* get_slab(page* pagep);
+    // 获取页面所属的slab对象
+    static slab* get_slab(page* pagep);
 
-	static page* virtual_to_page(void* vir);
+    // 将虚拟地址转换为页面对象的指针
+    static page* virtual_to_page(void* vir);
+
 } page;
 
