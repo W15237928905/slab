@@ -1,34 +1,32 @@
-#define ERROR_H
+#pragma once
 
-#include <iostream>
+#include <stdbool.h>
 
-enum kmem_error_t {
-    KMEM_SUCCESS,
-    KMEM_NULL_CACHE,
-    KMEM_ALLOC_FAILURE,
-    KMEM_NAME_TOO_LONG,
-    KMEM_FATAL_ERROR,
-    KMEM_OUT_OF_MEMORY,
-    KMEM_INVALID_SIZE,
-    KMEM_OBJECT_NOT_FOUND
-};
+// 定义错误代码的枚举类型
+typedef enum {
+    NO_ERROR = 0,
+    INVALID_ORDER,
+    NULL_POINTER,
+    MEMORY_ALLOCATION_FAILED,
+    BUDDY_SYSTEM_OVERFLOW,
+    UNKNOWN_ERROR
+} error_code_t;
 
-const char* kmem_error_str(kmem_error_t error) {
-    switch (error) {
-        case KMEM_SUCCESS: return "KMEM_SUCCESS";
-        case KMEM_NULL_CACHE: return "KMEM_NULL_CACHE";
-        case KMEM_ALLOC_FAILURE: return "KMEM_ALLOC_FAILURE";
-        case KMEM_NAME_TOO_LONG: return "KMEM_NAME_TOO_LONG";
-        case KMEM_FATAL_ERROR: return "KMEM_FATAL_ERROR";
-        case KMEM_OUT_OF_MEMORY: return "KMEM_OUT_OF_MEMORY";
-        case KMEM_INVALID_SIZE: return "KMEM_INVALID_SIZE";
-        case KMEM_OBJECT_NOT_FOUND: return "KMEM_OBJECT_NOT_FOUND";
-        default: return "UNKNOWN_ERROR";
-    }
-}
+// 定义用于存储信息的结构体
+typedef struct error {
+    bool occurred = false;         // 是否发生错误
+    error_code_t code;     // 错误代码
+    char message[50];     // 错误信息
+    char function[64];     // 发生错误的函数名
+} error_t;
 
-void log_error(kmem_error_t error, const char* function) {
-    std::cerr << "ERROR in " << function << ": " << kmem_error_str(error) << std::endl;
-}
+// 初始化错误信息
+void init_error(error_t* err);
+
+// 设置错误信息
+void set_error(error_t* err, error_code_t code, const char* message, const char* function);
+
+// 打印错误信息
+void print_error(const error_t* err);
 
 
