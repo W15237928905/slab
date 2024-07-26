@@ -91,7 +91,32 @@
 >
 >  五、main函数部分
 >
+>  该部分实现了一个基于SLAB分配器的内存管理系统，并通过多线程来测试内存分配和释放的功能。
+  
+>    #define BLOCK_NUMBER (1000)
+>    #define THREAD_NUM (5)
+>    #define ITERATIONS (1000)
+>    #define shared_size (7)
+>  这些宏定义了一些常量，用于指定内存块的数量、线程数量、迭代次数和共享对象的大小。
+
+>struct objects_s {
+>    kmem_cache_t* cache;
+>    void* data;
+>};
+>  用于存储缓存对象和数据指针
+
+>void construct(void* data) {
+>    printf("Shared object constructed.\n");
+>    memset(data, MASK, shared_size);
+>}
+>初始化共享对象的数据。
+
 >
+>
+>
+
+
+
 ## 3.4 线程安全
 >
 >- 使用 `recursive_mutex` 保证对缓存操作的线程安全。
