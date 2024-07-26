@@ -6,18 +6,18 @@
 
 # 2.比赛准备
 
-理论学习：
-
-[Linux内存管理中的slab分配器 - 摩斯电码 - 博客园](https://www.cnblogs.com/pengdonglin137/p/3878552.html)
-
-[slab分配器](https://github.com/sonntex/slab-allocator)
-
-代码参考：
-
-[Linux 内核 slab 分配器源码](https://zhuanlan.zhihu.com/p/358891862)
-
-[MemoryAllocator 分配器](https://github.com/cpt95/MemoryAllocator/blob/master/OS2%20Allocator%20Project/)
-
+>理论学习：
+>
+>[Linux内存管理中的slab分配器 - 摩斯电码 - 博客园](https://www.cnblogs.com/pengdonglin137/p/3878552.html)
+>
+>[slab分配器](https://github.com/sonntex/slab-allocator)
+>
+>代码参考：
+>
+>[Linux 内核 slab 分配器源码](https://zhuanlan.zhihu.com/p/358891862)
+>
+>[MemoryAllocator 分配器](https://github.com/cpt95/MemoryAllocator/blob/master/OS2%20Allocator%20Project/)
+>
 # 3.设计思路
 
 ## 3.1. 总体设计
@@ -27,15 +27,15 @@
 ## 3.2. 核心组件
 
  ### 3.2.1 头文件
-
-  -**buddy**: 包含了实现Buddy内存分配器所需的所有声明和函数原型。
-  -**error**: 包含与错误处理相关的所有声明和定义。
-  -**list**: 包含用于实现链表数据结构的声明和定义。
-  -**macros**: 包含与内存管理相关的宏定义。
-  -**page**: 包含与页内存管理相关的声明和定义。
-  -**slab**: 包含与Slab分配器相关的所有声明和函数原型。
-  -**slabstruct**: 包含用于Slab分配器的数据结构定义。
-  -**test**: 包含用于测试内存管理系统的声明和定义。
+>
+>- **buddy**: 包含了实现Buddy内存分配器所需的所有声明和函数原型。
+>- **error**: 包含与错误处理相关的所有声明和定义。
+>- **list**: 包含用于实现链表数据结构的声明和定义。
+>- **macros**: 包含与内存管理相关的宏定义。
+>- **page**: 包含与页内存管理相关的声明和定义。
+>- **slab**: 包含与Slab分配器相关的所有声明和函数原型。
+>- **slabstruct**: 包含用于Slab分配器的数据结构定义。
+>- **test**: 包含用于测试内存管理系统的声明和定义。
 
  ### 3.2.2 源文件
 
