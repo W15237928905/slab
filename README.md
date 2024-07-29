@@ -1,36 +1,42 @@
 # 1.题目：Linux内核lab内存分配器对象化实现  
 
 ### 说明 
-- 赛题：`proj123-linux-slab-cpp`
-- 队名：'希望队'
-- 参赛成员：胡梅山 郭宇恒
+-  赛题：`proj123-linux-slab-cpp`
+
+-  队名：'希望队'
+
+-  参赛成员：胡梅山 郭宇恒
 
 > ### 简介
-> 为了解决小块内存的分配，Linux内核基于Solaris 2.4中的slab分配算法实现了自己的slab分配器。
-> slab分配器另一个主要功能是作为一个高速缓存，它用来存储内核中那些经常分配并释放的对象。
-> C + +语言提供了面向对象的语言层面支持，使对象的管理更为清晰。
-> 本项目拟利用C + +语言对Linux内核slab分配算法进行重新改写，实现面向对象的块内存分配与管理。
-
+>  为了解决小块内存的分配，Linux内核基于Solaris 2.4中的slab分配算法实现了自己的slab分配器。
+>
+>  slab分配器另一个主要功能是作为一个高速缓存，它用来存储内核中那些经常分配并释放的对象。
+>
+>  C + +语言提供了面向对象的语言层面支持，使对象的管理更为清晰。
+>
+>  本项目拟利用C + +语言对Linux内核slab分配算法进行重新改写，实现面向对象的块内存分配与管理。
+>
 # 2.比赛准备
 
 >理论学习：
 >
->[Linux内存管理中的slab分配器 - 摩斯电码 - 博客园](https://www.cnblogs.com/pengdonglin137/p/3878552.html)
+>  [Linux内存管理中的slab分配器 - 摩斯电码 - 博客园](https://www.cnblogs.com/pengdonglin137/p/3878552.html)
 >
->[slab分配器](https://github.com/sonntex/slab-allocator)
+>  [slab分配器](https://github.com/sonntex/slab-allocator)
 >
 >代码参考：
 >
->[Linux 内核 slab 分配器源码](https://zhuanlan.zhihu.com/p/358891862)
+>  [Linux 内核 slab 分配器源码](https://zhuanlan.zhihu.com/p/358891862)
 >
->[MemoryAllocator 分配器](https://github.com/cpt95/MemoryAllocator/blob/master/OS2%20Allocator%20Project/)
+>  [MemoryAllocator 分配器](https://github.com/cpt95/MemoryAllocator/blob/master/OS2%20Allocator%20Project/)
 >
 # 3.设计思路
 
 ## 3.1. 总体设计
 
-> 本项目实现实现了一个基于Linux内核Slab分配器的面向对象内存分配系统。设计遵循模块化和面向对象的原则，将内存分配器划分为多个组件，每个组件负责特定内存分配不同阶段的功能。
-
+>  本项目实现实现了一个基于Linux内核Slab分配器的面向对象内存分配系统。
+>  设计遵循模块化和面向对象的原则，将内存分配器划分为多个组件，每个组件负责特定内存分配不同阶段的功能。
+>
 ## 3.2. 核心组件
 
  ### 3.2.1 头文件
@@ -99,33 +105,15 @@
 >  五、main函数部分
 >
 >  该部分实现了一个基于SLAB分配器的内存管理系统，并通过多线程来测试内存分配和释放的功能。
-  
->    #define BLOCK_NUMBER (1000)
->    #define THREAD_NUM (5)
->    #define ITERATIONS (1000)
->    #define shared_size (7)
->  这些宏定义了一些常量，用于指定内存块的数量、线程数量、迭代次数和共享对象的大小。
-
->struct objects_s {
->    kmem_cache_t* cache;
->    void* data;
->};
->  用于存储缓存对象和数据指针
-
->void construct(void* data) {
->    printf("Shared object constructed.\n");
->    memset(data, MASK, shared_size);
->}
->初始化共享对象的数据。
-
+>  使用宏定义了常量，用于指定内存块的数量、线程数量、迭代次数和共享对象的大小。
+>  使用 objects_s 结构体用于存储缓存对象和数据指针。
+>- **初始化**: 'construct' 初始化共享对象的数据。
+>- **检查**: 'check' 检查数据是否被正确初始化。
+>- **线程实现**: 'work' 为每个线程创建一个缓存，分配和检查对象，并最终释放所有分配的内存。
+>- **运行线程**: 'run_threads' 用于运行多个线程。
 >
->
->
-
-
-
-## 3.4 线程安全
->
+## 3.4 安全
+>- 线程安全
 >- 使用 `recursive_mutex` 保证对缓存操作的线程安全。
 >
 ## 3.5 性能优化
