@@ -24,11 +24,7 @@
 >
 >  [slab分配器](https://github.com/sonntex/slab-allocator)
 >
->代码参考：
->
->  [Linux 内核 slab 分配器源码](https://zhuanlan.zhihu.com/p/358891862)
->
->  [MemoryAllocator 分配器](https://github.com/cpt95/MemoryAllocator/blob/master/OS2%20Allocator%20Project/)
+
 >
 # 3.设计思路
 
