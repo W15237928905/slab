@@ -27,7 +27,7 @@ int check(void* data, size_t size) {
     for (size_t i = 0; i < size; i++) {
         if (((unsigned char*)data)[i] != MASK) {
             ret = 0;
-            break; // ÔÚµÚÒ»¸ö´íÎóÊ±¾ÍÍË³öÑ­»·
+            break; // ï¿½Úµï¿½Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ë³ï¿½Ñ­ï¿½ï¿½
         }
     }
     return ret;
@@ -52,7 +52,6 @@ int work(struct data_s data) {
         error_t err;
         set_error(&err, MEMORY_ALLOCATION_FAILED, "Error: Object allocation failed", __func__);
         print_error(&err);
-        //std::cerr << "Error: Object allocation failed" << std::endl;
         return 0;
     }
 
@@ -63,7 +62,6 @@ int work(struct data_s data) {
                 error_t err;
                 set_error(&err, NULL_POINTER, "Error: Shared cache is null", __func__);
                 print_error(&err);
-                //std::cerr << "Error: Shared cache is null" << std::endl;
                 kfree(objs);
                 return 0;
             }
@@ -73,7 +71,6 @@ int work(struct data_s data) {
                 error_t err;
                 set_error(&err, MEMORY_ALLOCATION_FAILED, "Error: Memory allocation failed", __func__);
                 print_error(&err);
-               // std::cerr << "Error: Memory allocation failed" << std::endl;
                 kfree(objs);
                 return 0;
             }
@@ -84,7 +81,6 @@ int work(struct data_s data) {
                 error_t err;
                 set_error(&err, MEMORY_ALLOCATION_FAILED, "Error: Data check failed for shared cache", __func__);
                 print_error(&err);
-               // std::cerr << "Error: Data check failed for shared cache" << std::endl;
                 kfree(objs);
                 return 0;
             }
@@ -95,7 +91,6 @@ int work(struct data_s data) {
                 error_t err;
                 set_error(&err, MEMORY_ALLOCATION_FAILED, "Error: Memory allocation failed", __func__);
                 print_error(&err);
-                //std::cerr << "Error: Memory allocation failed" << std::endl;
                 kfree(objs);
                 return 0;
             }
