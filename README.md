@@ -1,4 +1,4 @@
-# 1.题目：Linux内核Slab内存分配器对象化实现  
+# 1.题目：Linux内核slab内存分配器对象化实现  
 
 ### 说明 
 -  赛题：`proj123-linux-slab-cpp`
