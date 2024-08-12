@@ -112,7 +112,25 @@
 >- **检查**: 'check' 检查数据是否被正确初始化。
 >- **线程实现**: 'work' 为每个线程创建一个缓存，分配和检查对象，并最终释放所有分配的内存。
 >- **运行线程**: 'run_threads' 用于运行多个线程。
->
+
+>main()
+│
+├── kmem_init()
+├── kmem_cache_create("shared object")
+├── run_threads(work, &data, THREAD_NUM)
+│   └── work(struct data_s data)
+│       ├── kmem_cache_create(thread-specific cache)
+│       ├── kmalloc()
+│       ├── kmem_cache_alloc()
+│       ├── construct() (for shared objects)
+│       ├── check()
+│       ├── kmem_cache_info()
+│       ├── kmem_cache_free()
+│       ├── kfree()
+│       └── kmem_cache_destroy(thread-specific cache)
+├── kmem_cache_destroy(shared cache)
+└── free()
+
 ## 3.4 安全
 >
 >- **线程安全**： 使用 `recursive_mutex` 保证对缓存操作的线程安全。
