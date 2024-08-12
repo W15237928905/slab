@@ -113,25 +113,6 @@
 >- **线程实现**: 'work' 为每个线程创建一个缓存，分配和检查对象，并最终释放所有分配的内存。
 >- **运行线程**: 'run_threads' 用于运行多个线程。
 
->main()
->│
->
->├── kmem_init()
->├── kmem_cache_create()
->├── run_threads()
->│   └── work()
->│       ├── kmem_cache_create()
->│       ├── kmalloc()
->│       ├── kmem_cache_alloc()
->│       ├── construct() ()
->│       ├── check()
->│       ├── kmem_cache_info()
->│       ├── kmem_cache_free()
->│       ├── kfree()
->│       └── kmem_cache_destroy()
->├── kmem_cache_destroy()
->└── free()
-
 ## 3.4 安全
 >
 >- **线程安全**： 使用 `recursive_mutex` 保证对缓存操作的线程安全。
