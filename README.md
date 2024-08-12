@@ -86,10 +86,15 @@
 >- **缓存销毁**: `kmem_cache_destroy` 销毁一个不再需要的缓存。
 >
 > 分配内存
+>
 ![image](img/分配内存.png)
+>
 >释放内存
+>
 ![image](img/释放内存.png)
+>
 >销毁内存
+>
 ![image](img/销毁内存.png)
 >
 >  三、error部分
