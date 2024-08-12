@@ -85,7 +85,9 @@
 >- **内存释放**: `kmem_cache_free` 释放缓存中的内存。
 >- **缓存销毁**: `kmem_cache_destroy` 销毁一个不再需要的缓存。
 >
-![image](img/分配内存.png)
+
+> ![image](img/分配内存.png)
+![image](img/释放内存.png)
 >  三、error部分
 >
 >  该部分用于输出程序错误信息，包含存储错误信息的结构体。
