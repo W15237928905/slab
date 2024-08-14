@@ -29,7 +29,9 @@
 >  [slab分配器](https://github.com/sonntex/slab-allocator)
 >
 >  [linux源码分析](https://www.cnblogs.com/tolimit/p/4566189.html)
-
+>
+>  [MemoryAllocator](https://github.com/cpt95/MemoryAllocator)
+>
 
 # 3.设计思路
 
